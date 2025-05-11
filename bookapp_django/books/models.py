@@ -43,6 +43,7 @@ class Book(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='books')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    rating = models.FloatField(default=0)  # 新增字段，默认0分
 
     def __str__(self):
         return f"{self.title} by {self.author}"

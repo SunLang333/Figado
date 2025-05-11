@@ -233,8 +233,17 @@ async function fetchBooks() {
     }
 
     // 从后端API获取书籍数据，token自动由ApiServiceDebug带上
-    const response = await ApiServiceDebug.get<Book[]>('/api/books/', auth.accessToken)
-    books.value = response
+    const rawBooks = await ApiServiceDebug.get<any[]>('/api/books/', auth.accessToken)
+    books.value = rawBooks.map(book => ({
+      id: book.id,
+      title: book.title,
+      author: book.author,
+      coverUrl: book.cover_image || '',
+      rating: typeof book.rating === 'number' ? book.rating : 0,
+      category: book.category || '',
+      language: book.language || '',
+      description: book.description || ''
+    }))
     isLoading.value = false
   } catch (error) {
     console.error('Error fetching books:', error)
