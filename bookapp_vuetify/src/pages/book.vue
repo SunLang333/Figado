@@ -123,11 +123,42 @@ function goBack() {
   router.push('/books')
 }
 
-function downloadEpub() {
+async function downloadEpub() {
   if (!book.value || !book.value.id) return
-  // 假设后端下载接口为 /api/books/<id>/download/
-  const url = `/api/books/${book.value.id}/download/`
-  window.open(url, '_blank')
+  let baseUrl = ''
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    baseUrl = 'http://localhost:8000'
+  } else {
+    baseUrl = window.location.origin
+  }
+  const url = `${baseUrl}/api/books/${book.value.id}/download/`
+  try {
+    const res = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`
+      }
+    })
+    if (!res.ok) {
+      throw new Error('下载失败，状态码：' + res.status)
+    }
+    const blob = await res.blob()
+    const contentDisposition = res.headers.get('Content-Disposition')
+    let filename = 'book.epub'
+    if (contentDisposition) {
+      const match = contentDisposition.match(/filename="?([^";]+)"?/)
+      if (match) filename = decodeURIComponent(match[1])
+    }
+    const blobUrl = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = blobUrl
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(blobUrl)
+  } catch (e) {
+    alert('下载失败：' + e)
+  }
 }
 
 onMounted(fetchBook)

@@ -80,7 +80,7 @@
 
           <!-- 下载 EPUB 按钮 -->
           <v-btn
-            v-if="book"
+            v-if="book && book.id"
             color="primary"
             prepend-icon="mdi-download"
             class="mb-4"
@@ -535,11 +535,9 @@ async function copyLink() {
 }
 
 async function downloadEpub() {
-  if (!book.value || !book.value.id) return
+  if (!book || !book.value || !book.value.id) return
   try {
-    // 假设后端下载接口为 /api/books/<id>/download/
     const url = `/api/books/${book.value.id}/download/`
-    // 直接跳转下载
     window.open(url, '_blank')
   } catch (err) {
     await mobileService.showToast('下载失败')
