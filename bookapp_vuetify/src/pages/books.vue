@@ -83,7 +83,7 @@
     </v-row>
 
     <!-- 分页控件 -->
-    <v-row justify="center" class="mt-4">
+    <!-- <v-row justify="center" class="mt-4">
       <v-pagination
         v-model="page"
         :length="totalPages"
@@ -93,7 +93,7 @@
         @click:prev="prevPage"
         @update:modelValue="changePage"
       ></v-pagination>
-    </v-row>
+    </v-row> -->
   </v-container>
 </template>
 

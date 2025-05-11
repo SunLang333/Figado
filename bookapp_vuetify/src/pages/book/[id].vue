@@ -78,6 +78,17 @@
           <h3 class="text-h6 mb-2">简介</h3>
           <p class="text-body-1 mb-4">{{ book.description }}</p>
 
+          <!-- 下载 EPUB 按钮 -->
+          <v-btn
+            v-if="book"
+            color="primary"
+            prepend-icon="mdi-download"
+            class="mb-4"
+            @click="downloadEpub"
+          >
+            下载 EPUB
+          </v-btn>
+
           <v-list>
             <v-list-item>
               <template v-slot:prepend>
@@ -521,6 +532,18 @@ async function copyLink() {
     await mobileService.showToast('复制失败')
   }
   showShareDialog.value = false
+}
+
+async function downloadEpub() {
+  if (!book.value || !book.value.id) return
+  try {
+    // 假设后端下载接口为 /api/books/<id>/download/
+    const url = `/api/books/${book.value.id}/download/`
+    // 直接跳转下载
+    window.open(url, '_blank')
+  } catch (err) {
+    await mobileService.showToast('下载失败')
+  }
 }
 </script>
 

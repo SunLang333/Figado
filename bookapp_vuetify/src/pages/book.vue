@@ -27,7 +27,18 @@
             <span>{{ book.description }}</span>
           </div>
           <v-divider class="my-4" />
-          <v-btn color="primary" @click="goBack">返回列表</v-btn>
+          <div class="d-flex align-center mb-4">
+            <v-btn
+              v-if="book && book.id"
+              color="primary"
+              prepend-icon="mdi-download"
+              class="mr-2"
+              @click="downloadEpub"
+            >
+              下载 EPUB
+            </v-btn>
+            <v-btn color="primary" @click="goBack">返回列表</v-btn>
+          </div>
         </v-card>
       </v-col>
     </v-row>
@@ -110,6 +121,13 @@ async function fetchBook() {
 
 function goBack() {
   router.push('/books')
+}
+
+function downloadEpub() {
+  if (!book.value || !book.value.id) return
+  // 假设后端下载接口为 /api/books/<id>/download/
+  const url = `/api/books/${book.value.id}/download/`
+  window.open(url, '_blank')
 }
 
 onMounted(fetchBook)
