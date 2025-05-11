@@ -3,7 +3,7 @@ from .models import Book
 
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author', 'user', 'category', 'visibility', 'created_at')
+    list_display = ('title', 'author', 'user', 'category', 'visibility', 'rating', 'created_at')  # 加入rating
     list_filter = ('visibility', 'category', 'language')
     search_fields = ('title', 'author', 'description', 'tags')
     readonly_fields = ('created_at', 'updated_at')
@@ -12,7 +12,7 @@ class BookAdmin(admin.ModelAdmin):
             'fields': ('title', 'author', 'language', 'category', 'tags')
         }),
         ('Details', {
-            'fields': ('description', 'publisher', 'publish_date', 'isbn', 'page_count')
+            'fields': ('description', 'publisher', 'publish_date', 'isbn', 'page_count', 'rating')  # 加入rating
         }),
         ('Settings', {
             'fields': ('visibility', 'allow_comments')

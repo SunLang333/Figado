@@ -16,47 +16,6 @@
             class="mr-2 search-field"
             @keyup.enter="searchBooks"
           ></v-text-field>
-          <v-btn color="primary" prepend-icon="mdi-filter-variant">
-            筛选
-            <v-menu activator="parent" location="bottom end">
-              <v-card min-width="300">
-                <v-list>
-                  <v-list-subheader>分类</v-list-subheader>
-                  <v-list-item v-for="category in categories" :key="category.value">
-                    <template v-slot:prepend>
-                      <v-checkbox
-                        v-model="selectedCategories"
-                        :value="category.value"
-                        hide-details
-                        density="compact"
-                      ></v-checkbox>
-                    </template>
-                    <v-list-item-title>{{ category.text }}</v-list-item-title>
-                  </v-list-item>
-
-                  <v-divider></v-divider>
-
-                  <v-list-subheader>语言</v-list-subheader>
-                  <v-list-item v-for="language in languages" :key="language.value">
-                    <template v-slot:prepend>
-                      <v-checkbox
-                        v-model="selectedLanguages"
-                        :value="language.value"
-                        hide-details
-                        density="compact"
-                      ></v-checkbox>
-                    </template>
-                    <v-list-item-title>{{ language.text }}</v-list-item-title>
-                  </v-list-item>
-                </v-list>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn variant="text" @click="resetFilters">重置</v-btn>
-                  <v-btn color="primary" @click="applyFilters">应用</v-btn>
-                </v-card-actions>
-              </v-card>
-            </v-menu>
-          </v-btn>
         </v-toolbar>
       </v-col>
     </v-row>
@@ -89,57 +48,37 @@
     <!-- 书籍列表 -->
     <v-row v-else>
       <v-col v-for="book in books" :key="book.id" cols="12" sm="6" md="4" lg="3">
-        <v-hover v-slot="{ isHovering, props }">
-          <v-card
-            v-bind="props"
-            :elevation="isHovering ? 8 : 2"
-            @click="viewBookDetails(book.id)"
-            class="book-card"
+        <v-card class="book-card" @click="viewBookDetails(book.id)" elevation="2">
+          <v-img
+            :src="book.coverUrl"
+            height="200"
+            cover
+            class="align-end"
+            gradient="to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.8) 100%"
           >
-            <v-img
-              :src="book.coverUrl"
-              height="200"
-              cover
-              class="align-end"
-              :class="{ 'on-hover': isHovering }"
-              gradient="to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.8) 100%"
-            >
-              <v-card-title class="text-white pb-0">{{ book.title }}</v-card-title>
-              <v-card-subtitle class="text-white pb-2">{{ book.author }}</v-card-subtitle>
-            </v-img>
+            <v-card-title class="text-white pb-0">{{ book.title }}</v-card-title>
+            <v-card-subtitle class="text-white pb-2">{{ book.author }}</v-card-subtitle>
+          </v-img>
 
-            <v-card-text>
-              <div class="d-flex align-center mb-1">
-                <v-rating
-                  v-model="book.rating"
-                  color="amber"
-                  density="compact"
-                  size="small"
-                  readonly
-                  half-increments
-                ></v-rating>
-                <span class="text-body-2 ml-2">{{ book.rating.toFixed(1) }}</span>
-              </div>
-              <div class="mb-2">
-                <v-chip size="small" color="primary" class="mr-1">{{ book.category }}</v-chip>
-                <v-chip size="small" variant="outlined">{{ book.language }}</v-chip>
-              </div>
-              <p class="text-truncate">{{ book.description }}</p>
-            </v-card-text>
-
-            <v-divider v-if="isHovering" class="mx-4"></v-divider>
-            <v-card-actions v-if="isHovering">
-              <v-btn variant="text" size="small" color="primary"> 查看详情 </v-btn>
-              <v-spacer></v-spacer>
-              <v-btn icon variant="text" size="small">
-                <v-icon>mdi-heart</v-icon>
-              </v-btn>
-              <v-btn icon variant="text" size="small">
-                <v-icon>mdi-bookmark</v-icon>
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-hover>
+          <v-card-text>
+            <div class="d-flex align-center mb-1">
+              <v-rating
+                v-model="book.rating"
+                color="amber"
+                density="compact"
+                size="small"
+                readonly
+                half-increments
+              ></v-rating>
+              <span class="text-body-2 ml-2">{{ book.rating.toFixed(1) }}</span>
+            </div>
+            <div class="mb-2">
+              <v-chip size="small" color="primary" class="mr-1">{{ book.category }}</v-chip>
+              <v-chip size="small" variant="outlined">{{ book.language }}</v-chip>
+            </div>
+            <p class="text-truncate">{{ book.description }}</p>
+          </v-card-text>
+        </v-card>
       </v-col>
     </v-row>
 
@@ -159,7 +98,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import mobileService from '@/services/MobileService'
 import { useAuthStore } from '@/stores/auth'
@@ -185,27 +124,6 @@ const books = ref<Book[]>([])
 const page = ref(1)
 const totalPages = ref(5)
 const itemsPerPage = 8
-
-// 分类和语言筛选
-const selectedCategories = ref<string[]>([])
-const selectedLanguages = ref<string[]>([])
-
-const categories = [
-  { text: '小说', value: 'novel' },
-  { text: '散文', value: 'essay' },
-  { text: '诗歌', value: 'poetry' },
-  { text: '历史', value: 'history' },
-  { text: '科学', value: 'science' },
-  { text: '技术', value: 'technology' }
-]
-
-const languages = [
-  { text: '中文', value: 'zh' },
-  { text: '英语', value: 'en' },
-  { text: '日语', value: 'ja' },
-  { text: '法语', value: 'fr' },
-  { text: '德语', value: 'de' }
-]
 
 onMounted(async () => {
   // 检查网络连接
@@ -252,28 +170,44 @@ async function fetchBooks() {
   }
 }
 
+async function searchBooks() {
+  try {
+    isLoading.value = true
+    networkError.value = false
+
+    const isConnected = await mobileService.checkNetwork()
+    if (!isConnected) {
+      networkError.value = true
+      isLoading.value = false
+      return
+    }
+
+    // 构造查询参数
+    const params = new URLSearchParams()
+    if (searchQuery.value) params.append('search', searchQuery.value)
+
+    const url = `/api/books/?${params.toString()}`
+    const rawBooks = await ApiServiceDebug.get<any[]>(url, auth.accessToken)
+    books.value = rawBooks.map(book => ({
+      id: book.id,
+      title: book.title,
+      author: book.author,
+      coverUrl: book.cover_image || '',
+      rating: typeof book.rating === 'number' ? book.rating : 0,
+      category: book.category || '',
+      language: book.language || '',
+      description: book.description || ''
+    }))
+    isLoading.value = false
+  } catch (error) {
+    console.error('Error searching books:', error)
+    networkError.value = true
+    isLoading.value = false
+  }
+}
+
 function viewBookDetails(bookId: number) {
   router.push({ path: `/book/${bookId}` })
-}
-
-function searchBooks() {
-  // 实现搜索功能
-  console.log('Searching for:', searchQuery.value)
-  // 实际项目中应调用API进行搜索
-}
-
-function resetFilters() {
-  selectedCategories.value = []
-  selectedLanguages.value = []
-}
-
-function applyFilters() {
-  // 实现筛选功能
-  console.log('Applied filters:', {
-    categories: selectedCategories.value,
-    languages: selectedLanguages.value
-  })
-  // 实际项目中应调用API进行筛选
 }
 
 function nextPage() {
@@ -302,12 +236,10 @@ function changePage(newPage: number) {
   height: 100%;
 }
 
+/* 移除悬浮动画 */
 .book-card:hover {
-  transform: translateY(-5px);
-}
-
-.on-hover {
-  opacity: 1 !important;
+  transform: none;
+  box-shadow: none;
 }
 
 @media (max-width: 600px) {

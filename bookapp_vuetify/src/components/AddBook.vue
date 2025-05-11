@@ -224,6 +224,27 @@
                     min="1"
                   ></v-text-field>
                 </v-col>
+
+                <!-- 新增评分输入 -->
+                <v-col cols="12" sm="6">
+                  <v-rating
+                    :model-value="bookData.rating ?? 0"
+                    @update:model-value="
+                      val => (bookData.rating = typeof val === 'number' ? val : 0)
+                    "
+                    length="5"
+                    color="amber"
+                    background-color="grey lighten-2"
+                    large
+                    half-increments
+                    clearable
+                    label="评分"
+                    :rules="ratingRules"
+                  ></v-rating>
+                  <span class="ml-2">{{
+                    bookData.rating ? bookData.rating + ' 分' : '未评分'
+                  }}</span>
+                </v-col>
               </v-row>
 
               <v-divider class="my-3"></v-divider>
@@ -328,6 +349,7 @@ interface BookData {
   publishDate: string
   isbn: string
   pageCount: number | null
+  rating: number | null // 新增评分字段
   visibility: string
   allowComments: boolean
 }
@@ -343,6 +365,7 @@ const bookData = reactive<BookData>({
   publishDate: '',
   isbn: '',
   pageCount: null,
+  rating: null, // 新增评分字段
   visibility: 'public',
   allowComments: true
 })
@@ -395,6 +418,8 @@ const bookFileRules = [
   (v: File | null) => !v || (v && v.name.endsWith('.epub')) || '只允许上传EPUB文件',
   (v: File | null) => !v || v.size < 100 * 1024 * 1024 || '文件大小不能超过100MB'
 ]
+
+const ratingRules = [(v: number | null) => v === null || (v >= 0 && v <= 5) || '评分必须在0到5之间']
 
 // 预览封面
 function previewCover(event: Event) {
@@ -468,6 +493,8 @@ function resetForm() {
       bookData.allowComments = true
     } else if (key === 'pageCount') {
       bookData.pageCount = null
+    } else if (key === 'rating') {
+      bookData.rating = null
     } else {
       // reset remaining string fields
       bookData[
@@ -522,6 +549,7 @@ async function submitBook() {
     formData.append('publish_date', bookData.publishDate)
     formData.append('isbn', bookData.isbn)
     if (bookData.pageCount) formData.append('page_count', String(bookData.pageCount))
+    if (bookData.rating) formData.append('rating', String(bookData.rating))
     formData.append('visibility', bookData.visibility)
     formData.append('allow_comments', String(bookData.allowComments))
     if (coverImage.value) formData.append('cover_image', coverImage.value)

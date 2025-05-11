@@ -13,7 +13,7 @@ class BookSerializer(serializers.ModelSerializer):
             'id', 'title', 'author', 'language', 'category', 'tags',
             'description', 'publisher', 'publish_date', 'isbn', 
             'page_count', 'visibility', 'allow_comments', 'cover_image',
-            'book_file', 'user', 'created_at', 'updated_at'
+            'book_file', 'user', 'created_at', 'updated_at', 'rating'
         ]
         read_only_fields = ['user', 'created_at', 'updated_at']
 
@@ -54,6 +54,6 @@ class BookListSerializer(serializers.ModelSerializer):
         model = Book
         fields = [
             'id', 'title', 'author', 'category', 'cover_image',
-            'visibility', 'user', 'created_at', 'updated_at'
+            'visibility', 'user', 'created_at', 'updated_at', 'rating'
         ]
         read_only_fields = ['user', 'created_at', 'updated_at']
