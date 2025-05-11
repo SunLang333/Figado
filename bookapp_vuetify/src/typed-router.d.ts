@@ -19,6 +19,7 @@ declare module 'vue-router/auto-routes' {
    */
   export interface RouteNamedMap {
     '/': RouteRecordInfo<'/', '/', Record<never, never>, Record<never, never>>,
+    '/add-book': RouteRecordInfo<'/add-book', '/add-book', Record<never, never>, Record<never, never>>,
     '/book': RouteRecordInfo<'/book', '/book', Record<never, never>, Record<never, never>>,
     '/book/[id]': RouteRecordInfo<'/book/[id]', '/book/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/books': RouteRecordInfo<'/books', '/books', Record<never, never>, Record<never, never>>,
