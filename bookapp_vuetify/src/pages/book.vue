@@ -1,0 +1,122 @@
+<template>
+  <v-container>
+    <v-row justify="center">
+      <v-col cols="12" md="8" lg="6">
+        <v-card class="pa-4">
+          <v-img :src="book.coverUrl" height="300" class="mb-4" v-if="book.coverUrl" />
+          <h1 class="text-h4 font-weight-bold mb-2">{{ book.title }}</h1>
+          <div class="mb-2"><span class="text-subtitle-1">作者：</span>{{ book.author }}</div>
+          <div class="mb-2">
+            <span class="text-subtitle-1">分类：</span>{{ book.category }}
+            <span class="ml-4 text-subtitle-1">语言：</span>{{ book.language }}
+          </div>
+          <div class="mb-2">
+            <span class="text-subtitle-1">评分：</span>
+            <v-rating
+              v-model="book.rating"
+              color="amber"
+              density="compact"
+              size="small"
+              readonly
+              half-increments
+            ></v-rating>
+            <span class="ml-2">{{ book.rating.toFixed(1) }}</span>
+          </div>
+          <div class="mb-2">
+            <span class="text-subtitle-1">简介：</span>
+            <span>{{ book.description }}</span>
+          </div>
+          <v-divider class="my-4" />
+          <v-btn color="primary" @click="goBack">返回列表</v-btn>
+        </v-card>
+      </v-col>
+    </v-row>
+    <v-row v-if="isLoading" justify="center" align="center" style="height: 30vh">
+      <v-progress-circular indeterminate color="primary"></v-progress-circular>
+    </v-row>
+    <v-row v-if="networkError" justify="center" align="center" style="height: 30vh">
+      <v-col cols="12" class="text-center">
+        <v-icon icon="mdi-wifi-off" size="64" color="grey-lighten-1"></v-icon>
+        <h2 class="text-h5 mt-4 text-grey-darken-1">网络连接错误</h2>
+        <v-btn color="primary" prepend-icon="mdi-refresh" @click="fetchBook">重试</v-btn>
+      </v-col>
+    </v-row>
+  </v-container>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import mobileService from '@/services/MobileService'
+import { useAuthStore } from '@/stores/auth'
+import ApiServiceDebug from '@/services/ApiServiceDebug'
+
+interface Book {
+  id: number
+  title: string
+  author: string
+  coverUrl: string
+  rating: number
+  category: string
+  language: string
+  description: string
+}
+
+const route = useRoute()
+const router = useRouter()
+const auth = useAuthStore()
+const isLoading = ref(false)
+const networkError = ref(false)
+const book = ref<Book>({
+  id: 0,
+  title: '',
+  author: '',
+  coverUrl: '',
+  rating: 0,
+  category: '',
+  language: '',
+  description: ''
+})
+
+async function fetchBook() {
+  try {
+    isLoading.value = true
+    networkError.value = false
+    const isConnected = await mobileService.checkNetwork()
+    if (!isConnected) {
+      networkError.value = true
+      isLoading.value = false
+      return
+    }
+    const bookId = route.params.id
+    const raw = await ApiServiceDebug.get<any>(`/api/books/${bookId}/`, auth.accessToken)
+    book.value = {
+      id: raw.id,
+      title: raw.title,
+      author: raw.author,
+      coverUrl: raw.cover_image || '',
+      rating: typeof raw.rating === 'number' ? raw.rating : 0,
+      category: raw.category || '',
+      language: raw.language || '',
+      description: raw.description || ''
+    }
+    isLoading.value = false
+  } catch (error) {
+    console.error('Error fetching book:', error)
+    networkError.value = true
+    isLoading.value = false
+  }
+}
+
+function goBack() {
+  router.push('/books')
+}
+
+onMounted(fetchBook)
+</script>
+
+<style scoped>
+.v-card {
+  border-radius: 16px;
+}
+</style>
