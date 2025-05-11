@@ -86,7 +86,7 @@ const filteredBooks = computed(() => {
   return books.value.filter(
     (b) =>
       b.title.toLowerCase().includes(term) ||
-      b.author.toLowerCase().includes(term)
+      b.author.toLowerCase().includes(term),
   );
 });
 </script>
