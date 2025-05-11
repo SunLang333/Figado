@@ -8,7 +8,7 @@
 
     <!-- 大屏幕上显示的按钮 -->
     <div class="d-none d-sm-flex">
-      <v-btn variant="text" to="/">首页</v-btn>
+      <v-btn variant="text" to="/books" prepend-icon="mdi-format-list-bulleted">列表</v-btn>
       <v-btn v-if="!loggedIn" variant="text" to="/login">登录</v-btn>
       <v-btn v-if="!loggedIn" variant="text" to="/register">注册</v-btn>
       <v-btn v-if="loggedIn" variant="text" to="/profile">个人中心</v-btn>
@@ -28,7 +28,7 @@
 
       <v-divider></v-divider>
 
-      <v-list-item to="/" prepend-icon="mdi-home">首页</v-list-item>
+      <v-list-item to="/books" prepend-icon="mdi-format-list-bulleted">列表</v-list-item>
 
       <template v-if="!loggedIn">
         <v-list-item to="/login" prepend-icon="mdi-login">登录</v-list-item>
