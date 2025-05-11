@@ -12,12 +12,23 @@ def book_file_path(instance, filename):
     # Return the complete path
     return os.path.join('books', filename)
 
+def cover_image_upload_path(instance, filename):
+    """Generate a unique file path for the cover image using uuid."""
+    ext = filename.split('.')[-1]
+    # 每本书有唯一uuid，封面放在以uuid命名的子目录下
+    if not instance.uuid:
+        instance.uuid = uuid.uuid4()
+    filename = f"cover.{ext}"
+    return os.path.join('book_covers', str(instance.uuid), filename)
+
 class Book(models.Model):
     """Model for book data and metadata."""
     VISIBILITY_CHOICES = [
         ('public', 'Public'),
         ('private', 'Private'),
     ]
+    
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, db_index=True)  # 唯一ID
     
     # Book metadata
     title = models.CharField(max_length=255)
@@ -36,7 +47,7 @@ class Book(models.Model):
     allow_comments = models.BooleanField(default=True)
     
     # Book files
-    cover_image = models.ImageField(upload_to='book_covers/', blank=True, null=True)
+    cover_image = models.ImageField(upload_to=cover_image_upload_path, blank=True, null=True)
     book_file = models.FileField(upload_to=book_file_path, null=True)  # For the EPUB file
     
     # Ownership and timestamps

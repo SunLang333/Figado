@@ -50,14 +50,15 @@ async function submitBookUpload() {
     const response = await fetch('http://localhost:8000/api/books/', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`
       },
       credentials: 'include',
       body: formData
     })
 
     console.log('响应状态:', response.status, response.statusText)
-    console.log('响应头:', [...response.headers.entries()])    if (!response.ok) {
+    console.log('响应头:', [...response.headers.entries()])
+    if (!response.ok) {
       let errorData = {}
       try {
         errorData = await response.json()

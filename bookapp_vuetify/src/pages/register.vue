@@ -161,33 +161,34 @@ async function register() {
       return
     }
 
-    // 模拟API注册调用
-    setTimeout(async () => {
-      try {
-        // 实际项目中应替换为真实API调用
-        // const response = await fetch('http://example.com/api/auth/register/', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify({
-        //     username: username.value,
-        //     email: email.value,
-        //     password: password.value,
-        //     languages: languages.value
-        //   })
-        // });
+    // 真实API注册调用
+    const response = await fetch('http://localhost:8000/api/auth/register/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: username.value,
+        email: email.value,
+        password: password.value,
+        languages: languages.value
+      })
+    })
 
-        await mobileService.showToast('注册成功！请登录')
-        router.push('/login')
-      } catch (error) {
-        console.error('Registration error:', error)
-        errorMessage.value = '注册失败，请重试'
-      } finally {
-        isLoading.value = false
-      }
-    }, 1500)
+    if (!response.ok) {
+      let errorData: any = {}
+      try {
+        errorData = await response.json()
+      } catch (e) {}
+      errorMessage.value = errorData && errorData.detail ? errorData.detail : '注册失败，请重试'
+      isLoading.value = false
+      return
+    }
+
+    await mobileService.showToast('注册成功！请登录')
+    router.push('/login')
   } catch (error) {
     console.error('Registration error:', error)
     errorMessage.value = '注册过程中发生错误'
+  } finally {
     isLoading.value = false
   }
 }
