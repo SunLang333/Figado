@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,14 +41,18 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "drf_yasg",
+    "corsheaders",  # 添加 CORS 支持
+    "corsheaders_fix",  # 添加 CORS 调试应用
     "users",
+    "books",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
+    "corsheaders.middleware.CorsMiddleware",  # 添加 CORS 中间件，必须在 CommonMiddleware 前面
+    "corsheaders_fix.middleware.CorsDebugMiddleware",  # 调试 CORS 问题的自定义中间件
+    "django.middleware.common.CommonMiddleware",    "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -140,3 +145,52 @@ SIMPLE_JWT = {
 
 # Use custom user model with languages field
 AUTH_USER_MODEL = 'users.CustomUser'
+
+# Media files (for book covers and EPUB files)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Maximum file upload size (10MB)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB in bytes
+
+# CORS settings for development - CHANGE FOR PRODUCTION!
+CORS_ALLOW_ALL_ORIGINS = True  # Development only - easier for debugging
+
+# Specific allowed origins - more secure for production
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # Vue development server
+    "http://localhost:8080",  # Vue production build served locally
+    "capacitor://localhost",  # Capacitor mobile app
+    "http://localhost",       # General localhost
+    "http://127.0.0.1:5173",  # Vue dev server by IP
+    "http://127.0.0.1:8080"   # Vue production by IP
+]
+
+# Required for credentials to work
+CORS_ALLOW_CREDENTIALS = True
+
+# Allow preflight (OPTIONS) to be cached for this long (seconds)
+CORS_PREFLIGHT_MAX_AGE = 86400  # 1 day
+
+# Allow all HTTP methods
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+# Allow all headers requested by the client
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]

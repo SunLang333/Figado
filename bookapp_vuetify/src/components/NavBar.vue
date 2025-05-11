@@ -1,21 +1,88 @@
 <template>
-  <v-app-bar app color="primary" dark>
-    <v-app-bar-nav-icon @click.stop="$emit('toggle-drawer')" />
-    <v-toolbar-title>BookApp</v-toolbar-title>
+  <v-app-bar app color="primary" dark :elevation="3">
+    <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
+    <v-toolbar-title @click="navigateTo('/')" class="text-truncate"
+      >Figado 书籍分享</v-toolbar-title
+    >
     <v-spacer />
-    <v-btn text to="/">Home</v-btn>
-    <!-- Add more navigation links here if needed -->
+
+    <!-- 大屏幕上显示的按钮 -->
+    <div class="d-none d-sm-flex">
+      <v-btn variant="text" to="/">首页</v-btn>
+      <v-btn v-if="!loggedIn" variant="text" to="/login">登录</v-btn>
+      <v-btn v-if="!loggedIn" variant="text" to="/register">注册</v-btn>
+      <v-btn v-if="loggedIn" variant="text" to="/profile">个人中心</v-btn>
+      <v-btn v-if="loggedIn" variant="text" @click="logout">退出</v-btn>
+    </div>
+
+    <!-- 用户头像 -->
+    <v-avatar v-if="loggedIn" class="ml-2" size="36">
+      <v-img src="https://i.pravatar.cc/150?img=7"></v-img>
+    </v-avatar>
   </v-app-bar>
+
+  <!-- 抽屉导航 (小屏幕) -->
+  <v-navigation-drawer v-model="drawer" temporary>
+    <v-list>
+      <v-list-item title="Figado 书籍分享" prepend-icon="mdi-book-open-page-variant" />
+
+      <v-divider></v-divider>
+
+      <v-list-item to="/" prepend-icon="mdi-home">首页</v-list-item>
+
+      <template v-if="!loggedIn">
+        <v-list-item to="/login" prepend-icon="mdi-login">登录</v-list-item>
+        <v-list-item to="/register" prepend-icon="mdi-account-plus">注册</v-list-item>
+      </template>
+
+      <template v-else>
+        <v-list-item to="/profile" prepend-icon="mdi-account">
+          <v-list-item-title>个人中心</v-list-item-title>
+          <v-list-item-subtitle>{{ username }}</v-list-item-subtitle>
+        </v-list-item>
+        <v-list-item @click="logout" prepend-icon="mdi-logout">退出</v-list-item>
+      </template>
+    </v-list>
+  </v-navigation-drawer>
 </template>
 
 <script setup lang="ts">
-// No script needed for this simple NavBar,
-// but defineEmits is good practice if the parent component needs to react to events.
-defineEmits(['toggle-drawer'])
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import mobileService from '../services/MobileService'
+
+const router = useRouter()
+const drawer = ref(false)
+
+// 登录状态
+const loggedIn = computed(() => !!localStorage.getItem('access'))
+const username = computed(() => localStorage.getItem('username') || '')
+
+function navigateTo(path: string) {
+  router.push(path)
+  drawer.value = false
+}
+
+async function logout() {
+  localStorage.removeItem('access')
+  localStorage.removeItem('refresh')
+  localStorage.removeItem('username')
+  await mobileService.showToast('退出登录成功')
+  router.push('/login')
+  drawer.value = false
+}
 </script>
 
 <style scoped>
 .v-toolbar-title {
   cursor: pointer;
+  max-width: 180px;
+}
+
+/* 针对移动设备的额外样式 */
+@media (max-width: 600px) {
+  .v-toolbar-title {
+    font-size: 1.1rem;
+  }
 }
 </style>

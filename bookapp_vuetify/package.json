@@ -10,15 +10,29 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --build --force",
     "lint": "eslint . --fix",
-    "format": "prettier --write \"**/*.{js,ts,vue,scss,json}\""
+    "format": "prettier --write \"**/*.{js,ts,vue,scss,json}\"",
+    "cap:sync": "npx cap sync",
+    "cap:build": "npm run build && npm run cap:sync",
+    "cap:open:android": "npx cap open android",
+    "cap:run:android": "npx cap run android"
   },
   "dependencies": {
+    "@capacitor/android": "^7.2.0",
+    "@capacitor/camera": "^7.0.1",
+    "@capacitor/core": "^7.2.0",
+    "@capacitor/network": "^7.0.1",
+    "@capacitor/preferences": "^7.0.1",
+    "@capacitor/status-bar": "^7.0.1",
+    "@capacitor/toast": "^7.0.1",
     "@fontsource/roboto": "5.2.5",
     "@mdi/font": "7.4.47",
+    "epubjs": "^0.3.93",
+    "pinia": "^3.0.2",
     "vue": "^3.5.13",
     "vuetify": "^3.8.1"
   },
   "devDependencies": {
+    "@capacitor/cli": "^7.2.0",
     "@tsconfig/node22": "^22.0.0",
     "@types/node": "^22.9.0",
     "@vitejs/plugin-vue": "^5.2.3",
