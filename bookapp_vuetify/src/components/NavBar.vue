@@ -19,4 +19,3 @@ defineEmits(['toggle-drawer'])
   cursor: pointer;
 }
 </style>
-// This is a simple navigation bar for a Vue.js application using Vuetify.
