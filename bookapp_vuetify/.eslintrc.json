@@ -1,0 +1,4 @@
+{
+  "ignorePatterns": ["dist", "node_modules", "*.d.ts"],
+  "extends": ["eslint-config-vuetify", "plugin:prettier/recommended"]
+}
