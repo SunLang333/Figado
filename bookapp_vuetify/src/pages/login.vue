@@ -65,6 +65,7 @@
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import mobileService from '@/services/MobileService'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const isFormValid = ref(false)
@@ -74,6 +75,7 @@ const showPassword = ref(false)
 const isLoading = ref(false)
 const errorMessage = ref('')
 const form = ref(null)
+const auth = useAuthStore()
 
 // 表单验证规则
 const usernameRules = [
@@ -129,9 +131,11 @@ async function login() {
       localStorage.setItem('access', data.access)
       localStorage.setItem('refresh', data.refresh)
       localStorage.setItem('username', username.value)
+      auth.setToken(data.access)
+      auth.setUsername(username.value)
 
       await mobileService.showToast('登录成功！')
-      router.push('/')
+      router.push('/profile')
     } catch (error) {
       console.error('Login error:', error)
       errorMessage.value = '登录失败，请检查网络连接'

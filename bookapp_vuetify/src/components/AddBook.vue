@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container style="max-height: 80vh; overflow-y: auto">
     <v-row>
       <v-col cols="12">
         <v-toolbar flat color="transparent">
@@ -70,26 +70,27 @@
             </v-card-text>
           </v-card>
 
-          <!-- 其他文件上传（如PDF） -->
+          <!-- 其他文件上传（仅支持EPUB） -->
           <v-card>
-            <v-card-title>书籍文件 <small class="text-grey">(可选)</small></v-card-title>
+            <v-card-title>书籍文件 <small class="text-grey">(仅支持EPUB)</small></v-card-title>
             <v-card-text>
               <v-file-input
                 v-model="bookFile"
-                label="上传书籍文件"
-                accept=".pdf,.epub,.mobi"
+                label="上传EPUB文件"
+                accept=".epub"
                 variant="outlined"
                 :rules="bookFileRules"
-                hint="支持 PDF, EPUB, MOBI 格式"
+                hint="仅支持 EPUB 格式，上传后自动解析元数据"
                 persistent-hint
                 show-size
                 density="comfortable"
                 chips
                 truncate-length="20"
+                @change="onEpubFileChange"
               ></v-file-input>
               <p class="text-caption text-medium-emphasis mt-2">
                 <v-icon size="small">mdi-information-outline</v-icon>
-                上传文件前请确保您拥有分享权限
+                上传EPUB后将自动解析书名、作者、简介、封面等信息
               </p>
               <v-btn
                 block
@@ -294,9 +295,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, defineEmits } from 'vue'
 import { useRouter } from 'vue-router'
 import mobileService from '@/services/MobileService'
+import * as EpubJS from 'epubjs'
+
+const emit = defineEmits(['success', 'cancel'])
 
 const router = useRouter()
 const form = ref(null)
@@ -387,7 +391,10 @@ const descriptionRules = [
   (v: string) => v.length <= 2000 || '简介不能超过2000个字符'
 ]
 
-const bookFileRules = [(v: any) => !v || v.size < 100 * 1024 * 1024 || '文件大小不能超过100MB']
+const bookFileRules = [
+  (v: File | null) => !v || (v && v.name.endsWith('.epub')) || '只允许上传EPUB文件',
+  (v: File | null) => !v || v.size < 100 * 1024 * 1024 || '文件大小不能超过100MB'
+]
 
 // 预览封面
 function previewCover(event: Event) {
@@ -503,22 +510,46 @@ async function submitBook() {
 
     isSubmitting.value = true
 
-    // 模拟API调用
-    setTimeout(async () => {
-      try {
-        // 实际项目中应上传文件和表单数据到服务器
-        // 模拟成功响应
-        newBookId.value = Math.floor(Math.random() * 1000) + 100
+    // 构造 FormData
+    const formData = new FormData()
+    formData.append('title', bookData.title)
+    formData.append('author', bookData.author)
+    formData.append('language', bookData.language)
+    formData.append('category', bookData.category)
+    formData.append('tags', bookData.tags)
+    formData.append('description', bookData.description)
+    formData.append('publisher', bookData.publisher)
+    formData.append('publish_date', bookData.publishDate)
+    formData.append('isbn', bookData.isbn)
+    if (bookData.pageCount) formData.append('page_count', String(bookData.pageCount))
+    formData.append('visibility', bookData.visibility)
+    formData.append('allow_comments', String(bookData.allowComments))
+    if (coverImage.value) formData.append('cover_image', coverImage.value)
+    if (bookFile.value) formData.append('book_file', bookFile.value)
 
-        // 显示成功对话框
-        showSuccessDialog.value = true
-        isSubmitting.value = false
-      } catch (error) {
-        console.error('Error submitting book:', error)
-        await mobileService.showToast('发布书籍失败，请重试')
-        isSubmitting.value = false
-      }
-    }, 1500)
+    // 真实API调用
+    const token = localStorage.getItem('access')
+    const response = await fetch('http://localhost:8000/api/books/', {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      await mobileService.showToast(errorData.detail || '发布书籍失败，请重试')
+      isSubmitting.value = false
+      return
+    }
+    const data = await response.json()
+    newBookId.value = data.id
+    showSuccessDialog.value = true
+    isSubmitting.value = false
+    // 通知父组件（如 profile.vue）
+    if (typeof window !== 'undefined') {
+      const event = new CustomEvent('success', { detail: { id: data.id } })
+      window.dispatchEvent(event)
+    }
   } catch (error) {
     console.error('Error submitting book:', error)
     await mobileService.showToast('发布过程中发生错误')
@@ -529,23 +560,94 @@ async function submitBook() {
 // 查看书籍详情
 function goToBookDetail() {
   showSuccessDialog.value = false
-  router.push(`/book/${newBookId.value}`)
+  // 触发父组件事件
+  emit('success', newBookId.value)
 }
 
 // 返回书籍列表
 function goToBookList() {
   showSuccessDialog.value = false
-  router.push('/books')
+  emit('success')
 }
 
 // 从设备选择文件的辅助方法
 function selectBookFile() {
   // 通过编程方式触发文件输入点击
-  const fileInputElement = document.querySelector('input[type="file"][accept=".pdf,.epub,.mobi"]')
+  const fileInputElement = document.querySelector('input[type="file"][accept=".epub"]')
   if (fileInputElement) {
     ;(fileInputElement as HTMLInputElement).click()
   } else {
     mobileService.showToast('无法访问文件选择器')
+  }
+}
+
+// 监听EPUB文件变更并解析元数据
+async function onEpubFileChange(file: File | null) {
+  if (!file) return
+  try {
+    const epubFileUrl = URL.createObjectURL(file)
+    const book = EpubJS.default()
+    book.open(epubFileUrl)
+    isSubmitting.value = true
+    await mobileService.showToast('正在解析EPUB文件...')
+    // 解析元数据
+    const metadata = await book.loaded.metadata
+    if (metadata.title) bookData.title = metadata.title
+    if (metadata.creator) bookData.author = metadata.creator
+    if (metadata.description) bookData.description = metadata.description
+    // 语言
+    if (metadata.language) {
+      const langMap: Record<string, string> = {
+        zh: '中文',
+        en: '英语',
+        ja: '日语',
+        ko: '韩语',
+        fr: '法语',
+        de: '德语',
+        es: '西班牙语',
+        ru: '俄语',
+        ar: '阿拉伯语'
+      }
+      const langCode = metadata.language.toLowerCase().split('-')[0]
+      bookData.language = Object.prototype.hasOwnProperty.call(langMap, langCode)
+        ? langMap[langCode]
+        : '其他'
+    }
+    // 分类/标签
+    const metadataAny = metadata as any
+    if (metadataAny.subject) {
+      if (Array.isArray(metadataAny.subject)) {
+        bookData.category = metadataAny.subject[0] || ''
+        bookData.tags = metadataAny.subject.join(',')
+      } else {
+        bookData.category = metadataAny.subject
+        bookData.tags = metadataAny.subject
+      }
+    }
+    // 出版社
+    if (metadata.publisher) bookData.publisher = metadata.publisher
+    // ISBN
+    if (metadata.identifier) bookData.isbn = metadata.identifier
+    // 封面
+    book.loaded.cover.then(cover => {
+      if (cover) {
+        book.archive.createUrl(cover, { base64: true }).then((url: string) => {
+          coverPreview.value = url
+          fetch(url)
+            .then(res => res.blob())
+            .then(blob => {
+              const file = new File([blob], 'cover.jpg', { type: 'image/jpeg' })
+              coverImage.value = file
+            })
+        })
+      }
+    })
+    await mobileService.showToast('EPUB解析完成')
+  } catch (err) {
+    console.error('解析EPUB文件时出错:', err)
+    await mobileService.showToast('EPUB解析失败')
+  } finally {
+    isSubmitting.value = false
   }
 }
 </script>
@@ -565,6 +667,11 @@ function selectBookFile() {
   align-items: center;
   justify-content: center;
   background-color: #f5f5f5;
+}
+
+.v-container {
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 @media (max-width: 600px) {

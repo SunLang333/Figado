@@ -194,172 +194,8 @@
     </v-dialog>
 
     <!-- 上传书籍弹窗 -->
-    <v-dialog v-model="uploadBookDialog" max-width="800" scrollable>
-      <v-card>
-        <v-card-title class="d-flex align-center">
-          <v-icon icon="mdi-upload" class="mr-2"></v-icon>
-          上传新书籍
-          <v-tooltip location="top">
-            <template v-slot:activator="{ props }">
-              <v-icon
-                v-bind="props"
-                icon="mdi-information-outline"
-                class="ml-2"
-                size="small"
-              ></v-icon>
-            </template>
-            <span>上传EPUB文件后，系统将自动解析书籍标题、作者和封面</span>
-          </v-tooltip>
-        </v-card-title>
-
-        <v-divider></v-divider>
-
-        <v-overlay v-model="isSubmitting" class="align-center justify-center" persistent>
-          <v-progress-circular indeterminate color="primary"></v-progress-circular>
-          <div class="text-subtitle-1 mt-2">正在处理...</div>
-        </v-overlay>
-
-        <v-card-text class="py-4">
-          <v-form ref="bookUploadForm">
-            <v-row>
-              <!-- 左侧：封面上传 -->
-              <v-col cols="12" md="4">
-                <div class="d-flex flex-column align-center">
-                  <div
-                    class="book-cover-upload mb-3 d-flex justify-center align-center"
-                    :class="{ 'has-cover': coverPreview }"
-                  >
-                    <v-img
-                      v-if="coverPreview"
-                      :src="coverPreview"
-                      height="250"
-                      cover
-                      class="rounded"
-                    ></v-img>
-                    <template v-else>
-                      <v-icon icon="mdi-image" size="48" color="grey-lighten-1"></v-icon>
-                      <div class="text-caption text-center text-grey-darken-1 mt-2">
-                        点击上传封面
-                      </div>
-                    </template>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      class="cover-input"
-                      @change="handleCoverChange"
-                    />
-                  </div>
-                  <div class="text-caption text-grey">推荐尺寸: 400x600px</div>
-                </div>
-              </v-col>
-
-              <!-- 右侧：书籍信息 -->
-              <v-col cols="12" md="8">
-                <v-text-field
-                  v-model="bookTitle"
-                  label="书籍标题 *"
-                  variant="outlined"
-                  required
-                  class="mb-2"
-                ></v-text-field>
-
-                <v-text-field
-                  v-model="bookAuthor"
-                  label="作者 *"
-                  variant="outlined"
-                  required
-                  class="mb-2"
-                ></v-text-field>
-
-                <v-row>
-                  <v-col cols="12" md="6">
-                    <v-select
-                      v-model="bookLanguage"
-                      :items="availableLanguages"
-                      label="语言 *"
-                      variant="outlined"
-                      required
-                      class="mb-2"
-                    ></v-select>
-                  </v-col>
-
-                  <v-col cols="12" md="6">
-                    <v-select
-                      v-model="bookCategory"
-                      :items="availableCategories"
-                      label="分类 *"
-                      variant="outlined"
-                      required
-                      class="mb-2"
-                    ></v-select>
-                  </v-col>
-                </v-row>
-
-                <v-textarea
-                  v-model="bookDescription"
-                  label="书籍描述"
-                  variant="outlined"
-                  rows="3"
-                  class="mb-2"
-                ></v-textarea>
-
-                <v-text-field
-                  v-model="bookTags"
-                  label="标签 (用逗号分隔)"
-                  variant="outlined"
-                  hint="例如: 科幻,太空,冒险"
-                  class="mb-2"
-                ></v-text-field>
-                <v-file-input
-                  v-model="bookFile"
-                  label="EPUB电子书文件 *"
-                  accept=".epub"
-                  variant="outlined"
-                  required
-                  class="mb-2"
-                  placeholder="选择EPUB格式的电子书文件"
-                  hint="仅支持EPUB格式，上传后将自动解析书籍信息"
-                  @update:model-value="parseEpubFile"
-                ></v-file-input>
-
-                <v-divider class="my-3"></v-divider>
-
-                <div class="d-flex align-center mb-2">
-                  <div class="text-subtitle-2 mr-4">可见性:</div>
-                  <v-radio-group v-model="bookVisibility" inline>
-                    <v-radio value="public" label="公开"></v-radio>
-                    <v-radio value="private" label="私有"></v-radio>
-                  </v-radio-group>
-                </div>
-
-                <v-switch v-model="bookAllowComments" label="允许评论" color="primary"></v-switch>
-              </v-col>
-            </v-row>
-          </v-form>
-        </v-card-text>
-
-        <v-divider></v-divider>
-
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn
-            color="grey-darken-1"
-            variant="text"
-            @click="uploadBookDialog = false"
-            :disabled="isSubmitting"
-          >
-            取消
-          </v-btn>
-          <v-btn
-            color="primary"
-            @click="submitBookUpload"
-            :loading="isSubmitting"
-            :disabled="isSubmitting"
-          >
-            上传
-          </v-btn>
-        </v-card-actions>
-      </v-card>
+    <v-dialog v-model="uploadBookDialog" max-width="900" scrollable>
+      <AddBook @success="onAddBookSuccess" @cancel="uploadBookDialog = false" />
     </v-dialog>
 
     <!-- 删除书籍确认弹窗 -->
@@ -389,6 +225,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import mobileService from '@/services/MobileService'
 import * as EpubJS from 'epubjs'
+import AddBook from '@/components/AddBook.vue'
 
 // 类型定义
 interface Book {
@@ -776,91 +613,14 @@ async function deleteBook() {
   }
 }
 
-async function submitBookUpload() {
-  if (!bookFile.value) {
-    await mobileService.showToast('请选择要上传的EPUB文件')
-    return
-  }
-
-  if (!bookTitle.value || !bookAuthor.value) {
-    await mobileService.showToast('请填写书籍标题和作者')
-    return
-  }
-
-  isSubmitting.value = true
-
-  try {
-    // 检查是否有网络连接
-    const isConnected = await mobileService.checkNetwork()
-    if (!isConnected) {
-      await mobileService.showToast('网络连接不可用，请稍后再试')
-      isSubmitting.value = false
-      return
-    }
-
-    // 创建表单数据
-    const formData = new FormData()
-    formData.append('title', bookTitle.value)
-    formData.append('author', bookAuthor.value)
-    formData.append('language', bookLanguage.value)
-    formData.append('category', bookCategory.value)
-    formData.append('description', bookDescription.value)
-    formData.append('tags', bookTags.value)
-    formData.append('visibility', bookVisibility.value)
-    formData.append('allow_comments', bookAllowComments.value ? 'true' : 'false')
-
-    if (bookFile.value) {
-      formData.append('book_file', bookFile.value)
-    }
-
-    if (bookCover.value) {
-      formData.append('cover_image', bookCover.value)
-    }
-
-    // 获取令牌
-    const token = localStorage.getItem('access')
-    if (!token) {
-      throw new Error('用户未登录')
-    }
-
-    // 发送上传请求到Django API
-    console.log('正在发送请求...')
-    const response = await fetch('http://localhost:8000/api/books/', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`
-        // 不要在这里设置 Content-Type，让浏览器自动设置正确的 multipart/form-data 和 boundary
-      },
-      credentials: 'include', // 包含凭证
-      body: formData
-    })
-
-    console.log('响应状态:', response.status, response.statusText)
-    console.log('响应头:', [...response.headers.entries()])
-    if (!response.ok) {
-      let errorData: any = {}
-      try {
-        errorData = await response.json()
-      } catch (e) {
-        console.error('解析错误响应失败:', e)
-      }
-      console.error('上传失败:', response.status, errorData)
-      throw new Error(errorData.detail || `上传失败 (${response.status})`)
-    }
-
-    // 处理成功响应
-    const newBook = await response.json()
-
-    // 上传成功后重新加载书籍列表，确保显示最新数据
-    await loadBooks()
-
-    await mobileService.showToast('书籍上传成功')
-    uploadBookDialog.value = false
-  } catch (err: any) {
-    console.error('上传书籍时出错:', err)
-    await mobileService.showToast('上传失败: ' + (err.message || '未知错误'))
-  } finally {
-    isSubmitting.value = false
+// 上传书籍弹窗回调
+function onAddBookSuccess(newBookId?: number) {
+  uploadBookDialog.value = false
+  // 可选：刷新书籍列表
+  if (typeof newBookId === 'number') {
+    goToBookDetail(newBookId)
+  } else {
+    loadBooks()
   }
 }
 </script>
