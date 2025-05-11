@@ -1,4 +1,4 @@
-// Mobile Device Service for Figado App
+// Mobile Device Service for Figaro App
 import { Network } from '@capacitor/network'
 import { Preferences } from '@capacitor/preferences'
 import { Toast } from '@capacitor/toast'

@@ -7,7 +7,7 @@
             <v-avatar size="80" class="mb-4" color="primary">
               <v-icon size="48" color="white">mdi-book-open-page-variant</v-icon>
             </v-avatar>
-            <h1 class="text-h4 font-weight-bold primary--text">登录到 Figado</h1>
+            <h1 class="text-h4 font-weight-bold primary--text">登录到 Figaro</h1>
             <p class="text-subtitle-1 text-medium-emphasis">您的个人书籍分享平台</p>
           </div>
 

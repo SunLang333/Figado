@@ -7,7 +7,7 @@
             <v-avatar size="80" class="mb-4" color="primary">
               <v-icon size="48" color="white">mdi-account-plus</v-icon>
             </v-avatar>
-            <h1 class="text-h4 font-weight-bold primary--text">注册 Figado</h1>
+            <h1 class="text-h4 font-weight-bold primary--text">注册 Figaro</h1>
             <p class="text-subtitle-1 text-medium-emphasis">创建您的个人书籍分享账户</p>
           </div>
 

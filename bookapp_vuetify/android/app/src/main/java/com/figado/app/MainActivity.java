@@ -1,4 +1,4 @@
-package com.figado.app;
+package com.Figaro.app;
 
 import android.os.Bundle;
 import com.getcapacitor.BridgeActivity;

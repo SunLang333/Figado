@@ -29,9 +29,9 @@ from drf_yasg import openapi
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Figado API",
+        title="Figaro API",
         default_version='v1',
-        description="API documentation for Figado book sharing platform",
+        description="API documentation for Figaro book sharing platform",
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),

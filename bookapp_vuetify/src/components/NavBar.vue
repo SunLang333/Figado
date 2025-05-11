@@ -1,8 +1,8 @@
 <template>
   <v-app-bar app color="primary" dark :elevation="3">
-    <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-    <v-toolbar-title @click="navigateTo('/')" class="text-truncate"
-      >Figado 书籍分享</v-toolbar-title
+    <!-- <v-app-bar-nav-icon @click.stop="drawer = !drawer" /> -->
+    <v-toolbar-title @click="navigateTo('/books')" class="text-truncate"
+      >Figaro 书籍分享</v-toolbar-title
     >
     <v-spacer />
 
@@ -24,17 +24,13 @@
   <!-- 抽屉导航 (小屏幕) -->
   <v-navigation-drawer v-model="drawer" temporary>
     <v-list>
-      <v-list-item title="Figado 书籍分享" prepend-icon="mdi-book-open-page-variant" />
-
+      <v-list-item title="Figaro 书籍分享" prepend-icon="mdi-book-open-page-variant" />
       <v-divider></v-divider>
-
       <v-list-item to="/books" prepend-icon="mdi-format-list-bulleted">列表</v-list-item>
-
       <template v-if="!loggedIn">
         <v-list-item to="/login" prepend-icon="mdi-login">登录</v-list-item>
         <v-list-item to="/register" prepend-icon="mdi-account-plus">注册</v-list-item>
       </template>
-
       <template v-else>
         <v-list-item to="/profile" prepend-icon="mdi-account">
           <v-list-item-title>个人中心</v-list-item-title>

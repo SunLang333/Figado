@@ -1,6 +1,6 @@
 {
-  "appId": "com.figado.app",
-  "appName": "Figado",
+  "appId": "com.Figaro.app",
+  "appName": "Figaro",
   "webDir": "dist",
   "server": {
     "androidScheme": "https"

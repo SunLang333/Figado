@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Figado</string>
-    <string name="title_activity_main">Figado</string>
-    <string name="package_name">com.figado.app</string>
-    <string name="custom_url_scheme">com.figado.app</string>
+    <string name="app_name">Figaro</string>
+    <string name="title_activity_main">Figaro</string>
+    <string name="package_name">com.Figaro.app</string>
+    <string name="custom_url_scheme">com.Figaro.app</string>
 </resources>

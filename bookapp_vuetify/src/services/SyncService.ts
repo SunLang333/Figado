@@ -1,4 +1,4 @@
-// Offline Sync Service for Figado App
+// Offline Sync Service for Figaro App
 import { Network } from '@capacitor/network'
 import mobileService from './MobileService'
 
