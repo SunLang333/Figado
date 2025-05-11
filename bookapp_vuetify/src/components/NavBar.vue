@@ -50,13 +50,15 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import mobileService from '../services/MobileService'
+import { useAuthStore } from '@/stores/auth'
+
+const auth = useAuthStore()
 
 const router = useRouter()
 const drawer = ref(false)
 
-// 登录状态
-const loggedIn = computed(() => !!localStorage.getItem('access'))
-const username = computed(() => localStorage.getItem('username') || '')
+const loggedIn = computed(() => auth.loggedIn)
+const username = computed(() => auth.username)
 
 function navigateTo(path: string) {
   router.push(path)
@@ -64,9 +66,7 @@ function navigateTo(path: string) {
 }
 
 async function logout() {
-  localStorage.removeItem('access')
-  localStorage.removeItem('refresh')
-  localStorage.removeItem('username')
+  auth.logout()
   await mobileService.showToast('退出登录成功')
   router.push('/login')
   drawer.value = false

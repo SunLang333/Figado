@@ -162,6 +162,8 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import mobileService from '@/services/MobileService'
+import { useAuthStore } from '@/stores/auth'
+import ApiServiceDebug from '@/services/ApiServiceDebug'
 
 interface Book {
   id: number
@@ -175,6 +177,7 @@ interface Book {
 }
 
 const router = useRouter()
+const auth = useAuthStore()
 const isLoading = ref(false)
 const networkError = ref(false)
 const searchQuery = ref('')
@@ -229,38 +232,15 @@ async function fetchBooks() {
       return
     }
 
-    // 模拟API调用延迟
-    setTimeout(() => {
-      // 模拟数据 - 实际项目中应从API获取
-      books.value = generateMockBooks()
-      isLoading.value = false
-    }, 1000)
+    // 从后端API获取书籍数据，token自动由ApiServiceDebug带上
+    const response = await ApiServiceDebug.get<Book[]>('/api/books/', auth.accessToken)
+    books.value = response
+    isLoading.value = false
   } catch (error) {
     console.error('Error fetching books:', error)
     networkError.value = true
     isLoading.value = false
   }
-}
-
-function generateMockBooks(): Book[] {
-  const mockBooks: Book[] = []
-  const categories = ['小说', '散文', '诗歌', '历史', '科学', '技术']
-  const languages = ['中文', '英语', '日语', '法语', '德语']
-
-  for (let i = 1; i <= 20; i++) {
-    mockBooks.push({
-      id: i,
-      title: `书名${i}`,
-      author: `作者${i}`,
-      coverUrl: `https://picsum.photos/300/450?random=${i}`,
-      rating: Math.random() * 5,
-      category: categories[Math.floor(Math.random() * categories.length)],
-      language: languages[Math.floor(Math.random() * languages.length)],
-      description: '这是一本关于人生、梦想和希望的书籍，探讨了人类文明的发展和未来可能面临的挑战。'
-    })
-  }
-
-  return mockBooks
 }
 
 function viewBookDetails(bookId: number) {
