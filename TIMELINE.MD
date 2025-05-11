@@ -1,5 +1,3 @@
-# 今日前端开发计划
-
 以下所有任务预期 **今日内** 完成，基于后端已就绪的注册/登录/Token 接口：
 
 1. 环境初始化  
@@ -35,4 +33,13 @@
    - 在开发过程中随时查阅 Swagger UI (`http://127.0.0.1:8000/api/docs/`)  
    - 在项目根目录更新 `docs/api.md`：记录前端调用示例及注意事项  
 
-完成以上步骤后，即可进入书籍管理、评论、推荐等后续功能的开发。  
+完成以上步骤后，即可进入书籍管理、评论、推荐等后续功能的开发。
+
+## 后端当前进度
+- 已定义并迁移 CustomUser 模型，包含 languages 字段
+- 实现 RegisterSerializer、RegisterView，支持用户注册
+- 使用 SimpleJWT 提供 TokenObtainPairView、TokenRefreshView 实现登录与刷新
+- 在 `urls.py` 中添加 `/api/auth/register/`、`/api/auth/login/`、`/api/auth/token/refresh/` 路由
+- 配置 `settings.py`：AUTH_USER_MODEL、REST_FRAMEWORK、SIMPLE_JWT
+- 集成 drf-yasg 并提供 Swagger UI (`/api/docs/`) 文档接口
+

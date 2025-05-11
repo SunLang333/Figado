@@ -14,8 +14,8 @@
 - 后台管理（书籍分类、用户管理、数据统计）  
 
 ## 技术选型
-- 后端：Python 3.14 + Django（ORM、权限系统） + Django REST Framework（RESTful API） 
-- 前端：Vue.js（Vue Router、Vuex、Element UI）  
+- 后端：Python 3.12 + Django（ORM、权限系统） + Django REST Framework（RESTful API） 
+- 前端：Vue.js（Vue Router、Vuex、Flowbite）  
 - 数据库：sqlite3
 
 ## 项目价值
