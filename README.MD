@@ -55,7 +55,6 @@
 
 - bookapp_django/：后端 Django 项目
 - bookapp_vuetify/：前端 Vue3 + Vuetify 项目
-- docs/：接口文档、开发记录
 - TIMELINE.MD：详细开发进度与变更记录
 
 ## 项目价值
