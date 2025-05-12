@@ -4,6 +4,7 @@ import Vue from '@vitejs/plugin-vue'
 import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import Fonts from 'unplugin-fonts/vite'
 import VueRouter from 'unplugin-vue-router/vite'
+import { VitePWA } from 'vite-plugin-pwa'
 
 // Utilities
 import { defineConfig } from 'vite'
@@ -38,6 +39,32 @@ export default defineConfig({
           }
         ]
       }
+    }),
+    VitePWA({
+      manifest: {
+        name: 'Figaro - 书籍分享平台',
+        short_name: 'Figaro',
+        description: '在线书籍分享与阅读平台',
+        theme_color: '#1976D2',
+        icons: [
+          {
+            src: 'favicon.ico',
+            sizes: '64x64 32x32 24x24 16x16',
+            type: 'image/x-icon'
+          },
+          {
+            src: 'pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: 'pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png'
+          }
+        ]
+      },
+      registerType: 'autoUpdate'
     })
   ],
   optimizeDeps: {

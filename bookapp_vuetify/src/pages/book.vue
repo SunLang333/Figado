@@ -118,6 +118,17 @@ interface Book {
   description: string
 }
 
+interface BookApiResponse {
+  id: number
+  title: string
+  author: string
+  cover_image: string | null
+  rating: number | null
+  category: string | null
+  language: string | null
+  description: string | null
+}
+
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
@@ -150,8 +161,11 @@ async function fetchBook() {
       isLoading.value = false
       return
     }
-    const bookId = route.params.id
-    const raw = await ApiServiceDebug.get<any>(`/api/books/${bookId}/`, auth.accessToken)
+    const bookId = (route.params as { id: string }).id
+    const raw = await ApiServiceDebug.get<BookApiResponse>(
+      `/api/books/${bookId}/`,
+      auth.accessToken
+    )
     book.value = {
       id: raw.id,
       title: raw.title,
