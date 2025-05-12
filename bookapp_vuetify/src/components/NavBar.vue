@@ -1,6 +1,6 @@
 <template>
   <v-app-bar app color="primary" dark :elevation="3">
-    <!-- <v-app-bar-nav-icon @click.stop="drawer = !drawer" /> -->
+    <v-app-bar-nav-icon v-if="!showButtons" @click.stop="drawer = !drawer" />
     <v-toolbar-title @click="navigateTo('/books')" class="text-truncate"
       >Figaro 书籍分享</v-toolbar-title
     >
@@ -43,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import mobileService from '../services/MobileService'
 import { useAuthStore } from '@/stores/auth'
@@ -55,6 +55,20 @@ const drawer = ref(false)
 
 const loggedIn = computed(() => auth.loggedIn)
 const username = computed(() => auth.username)
+
+const showButtons = ref(true)
+
+function updateShowButtons() {
+  showButtons.value = window.innerWidth >= 600
+}
+
+onMounted(() => {
+  updateShowButtons()
+  window.addEventListener('resize', updateShowButtons)
+})
+onUnmounted(() => {
+  window.removeEventListener('resize', updateShowButtons)
+})
 
 function navigateTo(path: string) {
   router.push(path)
