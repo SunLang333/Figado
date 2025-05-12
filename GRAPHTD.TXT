@@ -1,0 +1,14 @@
+graph TD
+    subgraph CustomUserModel["d:\Documents\GitHub\Figado\bookapp_django\users\models.py"]
+        A["Import Django modules (models, auth)"] --> B;
+        B["Define CustomUser class (inherits AbstractUser)"] --> C;
+        C["Extend standard user model"] --> D;
+        D["Add 'languages' field"] --> E;
+        E["Type: JSONField (list of strings)"] --> F;
+        F["Default: empty list"] --> G;
+        G["Allows blank: True"] --> H;
+        H["Help text: 'Preferred languages'"] --> I;
+        I["Purpose: Store user's preferred languages (e.g., ['cn', 'en'])"];
+    end
+
+// File: d:\Documents\GitHub\Figado\bookapp_django\books\models.py
