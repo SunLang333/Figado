@@ -3,6 +3,6 @@
   "appName": "Figaro",
   "webDir": "dist",
   "server": {
-    "androidScheme": "https"
+    "androidScheme": "http"
   }
 }

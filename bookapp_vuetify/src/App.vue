@@ -4,7 +4,6 @@
       <NavBar />
       <router-view />
     </v-main>
-
     <!-- 同步状态指示器 -->
     <sync-status-bar />
   </v-app>
@@ -26,3 +25,7 @@ onMounted(async () => {
   }
 })
 </script>
+
+<style scoped>
+/* 移除全局安全区，交由 NavBar 处理 */
+</style>

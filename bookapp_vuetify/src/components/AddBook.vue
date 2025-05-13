@@ -557,7 +557,7 @@ async function submitBook() {
 
     // 真实API调用
     const token = localStorage.getItem('access')
-    const response = await fetch('http://localhost:8000/api/books/', {
+    const response = await fetch('http://192.168.124.3:8000/api/books/', {
       method: 'POST',
       headers: token ? { Authorization: `Bearer ${token}` } : {},
       body: formData

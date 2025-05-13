@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar app color="primary" dark :elevation="3">
+  <v-app-bar app color="primary" dark :elevation="3" class="with-safe-area-top">
     <v-app-bar-nav-icon v-if="!showButtons" @click.stop="drawer = !drawer" />
     <v-toolbar-title @click="navigateTo('/books')" class="text-truncate"
       >Figaro 书籍分享</v-toolbar-title
@@ -94,5 +94,10 @@ async function logout() {
   .v-toolbar-title {
     font-size: 1.1rem;
   }
+}
+
+/* 只在安卓App/PWA下，NavBar顶部适配安全区 */
+.with-safe-area-top {
+  padding-top: env(safe-area-inset-top, 0px);
 }
 </style>

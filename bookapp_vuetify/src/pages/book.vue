@@ -61,8 +61,13 @@
         <v-btn color="primary" prepend-icon="mdi-refresh" @click="fetchBook">重试</v-btn>
       </v-col>
     </v-row>
-    <v-dialog v-model="epubViewer" max-width="1200px" persistent>
-      <v-card>
+    <v-dialog
+      v-model="epubViewer"
+      :fullscreen="$vuetify.display.smAndDown"
+      max-width="1200px"
+      persistent
+    >
+      <v-card class="epub-dialog-card">
         <v-card-title class="d-flex justify-space-between align-center">
           <span>EPUB 在线阅读</span>
           <v-btn icon @click="epubViewer = false"><v-icon>mdi-close</v-icon></v-btn>
@@ -70,7 +75,7 @@
         <v-card-text style="padding: 0">
           <div class="epub-reader-flex">
             <!-- 目录栏 -->
-            <div class="epub-toc-panel">
+            <div class="epub-toc-panel" v-if="!$vuetify.display.smAndDown">
               <v-list dense>
                 <v-list-item
                   v-for="item in epubToc"
@@ -191,8 +196,8 @@ function goBack() {
 async function downloadEpub() {
   if (!book.value || !book.value.id) return
   let baseUrl = ''
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    baseUrl = 'http://localhost:8000'
+  if (window.location.hostname === '192.168.124.3' || window.location.hostname === '127.0.0.1') {
+    baseUrl = 'http://192.168.124.3:8000'
   } else {
     baseUrl = window.location.origin
   }
@@ -244,67 +249,64 @@ function nextPage() {
 async function readEpubOnline() {
   if (!book.value || !book.value.id) return
   epubViewer.value = true
-  let baseUrl = ''
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    baseUrl = 'http://localhost:8000'
-  } else {
-    baseUrl = window.location.origin
-  }
-  const url = `${baseUrl}/api/books/${book.value.id}/download/`
-  try {
-    console.log('开始 fetch epub:', url)
-    const res = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${auth.accessToken}`
+  await nextTick()
+  setTimeout(() => {
+    ;(async () => {
+      const baseUrl = 'http://192.168.124.3:8000'
+      const url = `${baseUrl}/api/books/${book.value.id}/download/`
+      try {
+        console.log('开始 fetch epub:', url)
+        const res = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${auth.accessToken}`
+          }
+        })
+        console.log('fetch response:', res)
+        if (!res.ok) throw new Error('下载失败，状态码：' + res.status)
+        const arrayBuffer = await res.arrayBuffer()
+        console.log('arrayBuffer byteLength:', arrayBuffer.byteLength)
+        if (epubBlobUrl) {
+          window.URL.revokeObjectURL(epubBlobUrl)
+          epubBlobUrl = ''
+        }
+        const viewer = document.getElementById('epub-viewer')
+        if (!viewer) {
+          alert('找不到 epub-viewer 容器')
+          epubViewer.value = false
+          return
+        }
+        viewer.innerHTML = '' // 清空旧内容
+        const bookInstance = ePub(arrayBuffer)
+        console.log('bookInstance:', bookInstance)
+        rendition = bookInstance.renderTo('epub-viewer', { width: '100%', height: '100%' })
+        console.log('rendition:', rendition)
+        rendition.display()
+        bookInstance.on('error', (err: any) => {
+          alert('epub.js 加载错误: ' + err)
+          console.error('epub.js error:', err)
+        })
+        rendition.on('rendered', (section: any) => {
+          console.log('EPUB section rendered:', section)
+          tocActiveId.value = section.href || ''
+        })
+        bookInstance.loaded.navigation.then((nav: any) => {
+          console.log('EPUB navigation:', nav)
+          epubToc.value = nav.toc || []
+        })
+        bookInstance.loaded.metadata.then((meta: any) => {
+          console.log('EPUB metadata:', meta)
+        })
+        bookInstance.loaded.cover.then((cover: any) => {
+          console.log('EPUB cover:', cover)
+        })
+        console.log('EPUB 渲染已触发')
+      } catch (e) {
+        alert('加载失败：' + e)
+        epubViewer.value = false
+        console.error('EPUB 加载异常:', e)
       }
-    })
-    console.log('fetch response:', res)
-    if (!res.ok) throw new Error('下载失败，状态码：' + res.status)
-    const arrayBuffer = await res.arrayBuffer()
-    console.log('arrayBuffer:', arrayBuffer)
-    if (epubBlobUrl) {
-      window.URL.revokeObjectURL(epubBlobUrl)
-      epubBlobUrl = ''
-    }
-    await nextTick()
-    const viewer = document.getElementById('epub-viewer')
-    if (!viewer) {
-      alert('找不到 epub-viewer 容器')
-      epubViewer.value = false
-      return
-    }
-    viewer.innerHTML = '' // 清空旧内容
-    // 直接用 arrayBuffer 方式加载 epub
-    const bookInstance = ePub(arrayBuffer)
-    console.log('bookInstance:', bookInstance)
-    rendition = bookInstance.renderTo('epub-viewer', { width: '100%', height: '80vh' })
-    console.log('rendition:', rendition)
-    rendition.display()
-    // 错误调试
-    bookInstance.on('error', (err: any) => {
-      alert('epub.js 加载错误: ' + err)
-      console.error('epub.js error:', err)
-    })
-    rendition.on('rendered', (section: any) => {
-      console.log('EPUB section rendered:', section)
-      tocActiveId.value = section.href || ''
-    })
-    bookInstance.loaded.navigation.then(nav => {
-      console.log('EPUB navigation:', nav)
-      epubToc.value = nav.toc || []
-    })
-    bookInstance.loaded.metadata.then(meta => {
-      console.log('EPUB metadata:', meta)
-    })
-    bookInstance.loaded.cover.then(cover => {
-      console.log('EPUB cover:', cover)
-    })
-    console.log('EPUB 渲染已触发')
-  } catch (e) {
-    alert('加载失败：' + e)
-    epubViewer.value = false
-    console.error('EPUB 加载异常:', e)
-  }
+    })()
+  }, 120)
 }
 
 onMounted(fetchBook)
@@ -313,6 +315,9 @@ onMounted(fetchBook)
 <style scoped>
 .v-card {
   border-radius: 16px;
+}
+.epub-dialog-card {
+  padding-bottom: env(safe-area-inset-bottom);
 }
 .epub-reader-flex {
   display: flex;
@@ -350,5 +355,35 @@ onMounted(fetchBook)
   z-index: 2;
   display: flex;
   gap: 8px;
+}
+@media (max-width: 600px) {
+  .epub-dialog-card {
+    height: 100vh;
+    max-width: 100vw;
+    border-radius: 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .epub-reader-flex {
+    flex-direction: column;
+    height: calc(100vh - 56px - env(safe-area-inset-bottom));
+    min-width: 0;
+  }
+  .epub-toc-panel {
+    display: none;
+  }
+  .epub-viewer-panel {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  #epub-viewer {
+    width: 100vw;
+    height: 100%;
+    min-width: 0;
+    flex: 1;
+  }
 }
 </style>

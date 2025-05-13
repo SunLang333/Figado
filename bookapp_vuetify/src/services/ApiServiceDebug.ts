@@ -6,7 +6,7 @@ class ApiServiceDebug {
 
   constructor() {
     this.apiClient = axios.create({
-      baseURL: 'http://localhost:8000', // Replace with your backend URL
+      baseURL: 'http://192.168.124.3:8000', // Replace with your backend URL
       timeout: 10000
     })
 

@@ -47,7 +47,7 @@ async function submitBookUpload() {
 
     // 发送上传请求到Django API
     console.log('正在发送请求...')
-    const response = await fetch('http://localhost:8000/api/books/', {
+    const response = await fetch('http://192.168.124.3:8000/api/books/', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`

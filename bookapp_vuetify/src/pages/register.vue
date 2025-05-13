@@ -162,7 +162,7 @@ async function register() {
     }
 
     // 真实API注册调用
-    const response = await fetch('http://localhost:8000/api/auth/register/', {
+    const response = await fetch('http://192.168.124.3:8000/api/auth/register/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

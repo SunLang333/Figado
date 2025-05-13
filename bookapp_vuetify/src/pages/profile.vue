@@ -522,7 +522,7 @@ async function loadBooks() {
     }
 
     // 从API获取书籍列表
-    const response = await fetch('http://localhost:8000/api/books/', {
+    const response = await fetch('http://192.168.124.3:8000/api/books/', {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -586,7 +586,7 @@ async function deleteBook() {
     }
 
     // 从API删除书籍
-    const response = await fetch(`http://localhost:8000/api/books/${bookToDelete.value.id}/`, {
+    const response = await fetch(`http://192.168.124.3:8000/api/books/${bookToDelete.value.id}/`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${token}`
